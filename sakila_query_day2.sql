@@ -92,3 +92,32 @@ desc film_category;
     round(avg(amount) over(),2) as average_customer_payment,
     round(sum(amount) over(partition by customer_id ) - avg(amount) over(),2) as difference_from_average
     from payment;
+-- 3. Show the most recent rental per customer. (Medium: ROW_NUMBER() OVER PARTITION)
+	show tables;
+    desc customer_list;
+    desc rental;
+    
+    select a.customer_id, a.rental_id, date_format(a.rental_date, '%Y-%m-%d') as recent_rental_date
+    from (select r.*,
+    row_number() over(partition by r.customer_id order by r.rental_date desc) as rental_rank
+    from rental r) a
+    where rental_rank = 1;
+    
+-- 4. List top 2 highest-spending customers per store.
+	show tables;
+    desc customer;
+    desc store;
+    desc payment;
+    
+    select b.customer_id, b.store_id, total_spent, total_spent_rank
+    from (
+    select a.customer_id, a.store_id, total_spent, 
+    row_number() over(partition by a.store_id order by total_spent desc) as total_spent_rank 
+    from (
+    select c.customer_id, c.store_id, sum(p.amount) as total_spent
+    from customer c
+    join payment p ON c.customer_id = p.customer_id
+    group by c.customer_id, c.store_id
+    ) a
+    ) b
+    where total_spent_rank <= 2;
