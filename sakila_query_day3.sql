@@ -39,4 +39,8 @@ show tables;
     desc payment;
     desc rental;
     
+    
+-- 5.List customers who paid more than the average payment.
+	
+    
   
